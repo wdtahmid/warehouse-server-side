@@ -3,6 +3,7 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
 require('dotenv').config();
+const cors = require('cors');
 
 
 app.get('/', (req, res) => {
@@ -13,13 +14,30 @@ app.listen(port, () => {
     console.log('Listening to port', port);
 })
 
-
+app.use(cors());
+app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.USER}:${process.env.PASSWORD}@cluster0.tn8zr.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-client.connect(err => {
-    console.log('Database connected');
-    const collection = client.db("test").collection("devices");
-    // perform actions on the collection object
-    client.close();
-});
+
+
+async function run() {
+
+
+    try {
+
+        await client.connect();
+        const inventories = client.db("inventory").collection("products");
+
+        app.post('/additem', async (req, res) => {
+            const item = req.body;
+            const result = await inventories.insertOne(item);
+            res.send(result);
+            console.log(result);
+        })
+
+    }
+
+    finally { }
+}
+run().catch(console.dir);
