@@ -34,6 +34,12 @@ async function run() {
             const result = await inventories.insertOne(item);
             res.send(result);
             console.log(result);
+        });
+
+        app.get('/manageinventories', async (req, res) => {
+            const query = {};
+            const cursor = inventories.find(query);
+            res.send(await cursor.toArray());
         })
 
     }
