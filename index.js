@@ -55,9 +55,35 @@ async function run() {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await inventories.findOne(query);
-            console.log(result);
             res.send(result);
         })
+
+        app.put('/inventory-deliverd/:id', async (req, res) => {
+            const updatedInfo = req.body;
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateQuantity = {
+                $set: {
+                    quantity: updatedInfo.quantity,
+                },
+            }
+            const result = await inventories.updateOne(filter, updateQuantity, options);
+            res.send(result)
+        });
+        app.put('/inventory-restock/:id', async (req, res) => {
+            const updatedInfo = req.body;
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateQuantity = {
+                $set: {
+                    quantity: updatedInfo.quantity,
+                },
+            }
+            const result = await inventories.updateOne(filter, updateQuantity, options);
+            res.send(result)
+        });
 
     }
 
