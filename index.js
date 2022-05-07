@@ -3,6 +3,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
 require('dotenv').config();
+const jwt = require('jsonwebtoken');
 const cors = require('cors');
 
 
@@ -29,6 +30,15 @@ async function run() {
         await client.connect();
         const inventories = client.db("inventory").collection("products");
 
+        //Auth
+        app.post('/login', async (req, res) => {
+            const user = req.body;
+            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN, {
+                expiresIn: '1d'
+            })
+            res.send(accessToken)
+        })
+
         app.post('/additem', async (req, res) => {
             const item = req.body;
             const result = await inventories.insertOne(item);
@@ -50,12 +60,27 @@ async function run() {
             res.send(result)
             console.log(result);
         })
+        app.delete('/myitems/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await inventories.deleteOne(query);
+            res.send(result)
+            console.log(result);
+        })
 
         app.get('/inventory/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await inventories.findOne(query);
             res.send(result);
+        })
+
+        app.get('/myitems', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email }
+            const result = await inventories.find(query).toArray();
+            res.send(result)
+            console.log(query);
         })
 
         app.put('/inventory-deliverd/:id', async (req, res) => {
